@@ -24,4 +24,5 @@ Some remarks:
 	boogen;
 	u_boot configs;
 	kernel configs;
+	Add helping website: wiki.xilinx.com
 
