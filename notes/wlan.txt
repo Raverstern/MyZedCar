@@ -1,0 +1,25 @@
+How to configure the system and make the Wifi device become a Wifi AP?
+
+ifconfig -a
+Check whether there's something about wlan.
+Remember the name (e.g. wlan2).
+
+1.vi /etc/udhcpd.conf
+
+modify wlan0 to wlan2
+
+2.vi /etc/network/interfaces
+
+modify wlan0 to wlan2
+
+3.vi /etc/hostapd/hostapd.conf
+
+modify wlan0 to wlan2
+
+4.vi /root/go_wlan.sh
+
+modify wlan0 to wlan2
+
+-----------------------------------------------------------------------
+
+All after that, you can run the /root/go_wlan.sh

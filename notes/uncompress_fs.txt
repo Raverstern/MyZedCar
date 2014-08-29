@@ -1,0 +1,3 @@
+Don't uncompress the package first and cp the generated folder into the SD partition. That may have some errors with in the procedure.
+
+Instead, it's better to uncompress it directly into the SD card.
