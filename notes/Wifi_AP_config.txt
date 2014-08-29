@@ -1,0 +1,54 @@
+/* This note is copied from the Black-shirt TA's github README page. */
+
+How to config Wifi AP:
+======================
+1. apt-get install linux-firmware hostapd udhcpd wireless-tools 
+
+2.vi /etc/default/hostapd
+Add one line to the bottom:
+DAEMON_CONF="/etc/hostapd/hostapd.conf"
+
+3.vi /etc/hostapd/hostapd.conf
+# interface used by access point
+interface=wlan0
+# firmware driver
+driver=nl80211
+# access point SSID
+ssid=XupSmarterCar
+# operation mode (a = IEEE 802.11a, b = IEEE 802.11b, g = IEEE 802.11g)
+hw_mode=g
+# access point channel
+channel=6
+macaddr_acl=0
+auth_algs=1
+ignore_broadcast_ssid=0
+# key management algorithm
+#wpa_key_mgmt=WPA-PSK
+#wpa_passphrase=123456789
+#wpa=2
+# set ciphers
+wpa_pairwise=TKIP
+rsn_pairwise=CCMP
+
+4.vi /etc/network/interfaces
+iface wlan0 inet static
+address 192.168.0.1
+netmask 255.255.255.0
+
+5.vi /etc/udhcpd.conf
+start           192.168.0.20    #default: 192.168.0.20
+end             192.168.0.254   #default: 192.168.0.254
+interface       wlan0           #default: eth0
+remaining       yes             #default: yes
+lease_file      /var/lib/misc/udhcpd.leases
+pidfile /var/run/udhcpd.pid
+option  subnet  255.255.255.0
+opt     router  192.168.0.1
+option  domain  local
+option  lease   864000          # 10 days of seconds
+
+6.Run
+ifconfig wlan0 192.168.0.1
+/etc/init.d/udhcpd restart
+/etc/init.d/hostapd restart
+
