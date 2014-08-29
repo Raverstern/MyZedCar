@@ -1,0 +1,19 @@
+/* Based on u-boot-xlnx and configuring for ZedBoard. */
+
+cd include/configs/
+
+Modify:
+
+vi zynq-common.h
+
+"sdboot=if mmcinfo; then " \
+	"run uenvboot; " \
+	"echo Copying Linux from SD to RAM... && " \
+        "fatload mmc 0 0x3000000 ${kernel_image} && " \
+        "fatload mmc 0 0x2A00000 ${devicetree_image} && " \
+
+	//Modify the next two lines
+
+        "fatload mmc 0 0x2000000 ${ramdisk_image} && "          \*******del this line*****
+        "bootm 0x3000000 0x2000000 0x2A00000; "                 \***bootm 0x3000000 - 0x2A00000;***
+        "fi\0" \
