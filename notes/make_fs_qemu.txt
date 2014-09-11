@@ -1,0 +1,127 @@
+/* The words enbraced by Chinese character 【】 are my comments */
+
+qemu做系统请参照书稿10章:
+我们需要从Xilinx Git仓中下载QEMU源码，首先需要一台安装了Linux系统的计算机，并执行如下命令：
+
+bash> git clone https://github.com/Xilinx/qemu.git
+
+在进行编译前，我们需要对QEMU源码进行配置。
+
+bash> cd qemu
+
+bash> ./configure --target-list=arm-softmmu --disable-werror --disable-kvm
+
+在配置完全之后，我们可以使用如下命令来编译QEMU。
+
+bash> make
+
+
+
+----------------------------------------------------------- 【线上内容，为安装qemu的一种方式，只要安装了qemu就好】
+
+
+
+以下过程是基于Ubuntu 进行的，首先确保主机联网并安装了qemu的相关包：
+
+$ sudo apt-get install qemu-user-static qemu-system
+
+安装完成后开始创建定制系统，预计整个文件系统大小约为1GB，因此我们先创建一个1GB的镜像文件，
+
+$ mkdir qemu-ubuntu
+
+$ dd if=/dev/zero of=./ubuntu.img bs=4M count=1024【不是说好的1G吗……怎么这里弄了个4G……】
+
+【dd，创建或转换文件用的，参数：
+
+     if是input file，从/dev/zero输入，那是个不断输出null的文件；
+
+     of是output file，是输出文件，即要创建的文件；
+
+     bs为block size，指定传输时每一个块的大小；
+
+     count指定要传输多少块。】
+
+
+
+创建完成后将镜像对应为loop设备，
+
+$ sudo losetup –f ./ubuntu.img 【losetup：loop setup】
+
+为其格式化文件系统并挂载，
+
+$ sudo mkfs.ext4 /dev/loop0 【查了一下，执行完上一个步骤后，/dev/loop0的大小就变成了4G】
+
+$ sudo mount /dev/loop0 ./qemu-ubuntu
+
+
+
+【如果想做别的版本，只要查到该版本的发布代号，一般有两个单词，取前一个即可】
+
+接下来开始构建基础文件系统，这里选用Ubuntu 13.04 Raring作为系统版本，这一步需要较长时间。
+
+$ sudo qemu-debootstrap --arch=armhf raring qemu-ubuntu 【这一步需要安装debootstrap】
+
+$ sudo cp `which qemu-arm-static` qemu-ubuntu/usr/bin/【which可以获取当前环境下某命令或程序的完整执行路径】
+
+至此，一个基础系统已经初始化完成了，可以使用chroot进入我们刚刚搭建的系统，【chroot：change root】
+
+$ sudo chroot qemu-ubuntu
+
+这时候我们已经处在新系统中了，先对它进行配置，定向标准输出，添加软件源，
+
+$ echo “deb http://ports.ubuntu.com raring main restricted multiverse universe” > /etc/apt/source.list
+
+保存成功后可以开始更新系统，
+
+$ apt-get update
+
+软件源更新完成了就可以用apt来安装自己需要的软件包了，（注意，我们搭建的系统可是基于ARM架构的！）
+
+最后修改一下root密码，
+
+$ passwd
+
+$ exit 【退出至原始shell，可以先不执行】
+
+使用时只要把这个系统同步到sd卡上的ext4分区即可
+
+$ sudo rsync –a qemu-ubuntu/ /media/ext4 (e.g.)
+
+-----------------------------------
+不要用qemu做12.04，12.04启动有BUG
+------------------------------------------------------------------
+qemu做好后，把xilinx的12.10的ttyPS0.conf复制到qemu的ubuntu
+etc/init/目录下，其内容为：
+
+start on stopped rc RUNLEVEL=[2345] and (
+not-container or
+container CONTAINER=lxc or
+container CONTAINER=lxc-libvirt)
+
+stop on runlevel [!2345]
+
+respawn
+exec /sbin/getty -L -8 115200 ttyPS0
+【getty负责设置tty的传输速率，以及要求用户输入用户名，并将其传递给login程序】
+
+若要开机自启ROOT，末尾行变为：
+
+exec /bin/login -f root < /dev/ttyPS0 > /dev/ttyPS0 2>&1
+【login负责接受用户名，以及验证密码等工作，加了-f则表示不进行验证，直接进入命令后面写的用户】
+
+
+----------------------------------------------------------------------
+将qemu文件系统复制到SD卡ext4分区 【以下步骤可能涉及权限的问题，最好在启动之后再做】
+----------------------------------------------------------------------
+用户：#adduser XXX
+sudo权限添加：
+#chmod u+s /usr/bin/sudo 
+#chmod 440 /etc/sudoers
+#visudo
+#找到下面那一行ROOT的，添加一行:
+XXX     ALL=(ALL) ALL
+注意：接下来的内容，必须将文件系统复制到SD卡后，chroot SD卡的分区后运行，否则无法SUDO：
+SD卡内
+#chown root:root /usr/bin/sudo
+#chmod 4755 /usr/bin/sudo
+
