@@ -1,9 +1,9 @@
 MyZedCar
 ========
 
-  Smart car based on ZedBoard.
+Smart car based on ZedBoard.
 
-  Relative repositories of this project:
+Relative repositories of this project:
   
     Upper Computer: Zedboard
       kernel: linux-xup
@@ -16,4 +16,6 @@ MyZedCar
       Hardware Description: DE0-Nano
       Software: DE0-Nano
     
-    
+Before starting the building process, read the file "MyZedCar/notes/ReadMeFirst.txt" first, which is a general guideline of this project.
+
+
