@@ -1,7 +1,9 @@
-Don't uncompress the package first and cp the generated folder into the SD partition. That may have some errors with in the procedure.
+Don't uncompress the package first and cp the generated folder into the SD partition. 
+That may have some errors with in the procedure.
 
-Instead, it's better to uncompress it directly into the SD card.
+Instead, it's better to uncompress it directly into the SD card, or build up your own file system.
 
 --------------------------------------------------------------------------------------------------------------------------------------
 
-It's better for you to be the root when you are uncompressing the package.
+You'd better be the root when you are uncompressing the package.
+
